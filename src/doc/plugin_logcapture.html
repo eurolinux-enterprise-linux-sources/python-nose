@@ -1,0 +1,242 @@
+<html>
+  <head>
+    <title>nose: builtin plugin: logcapture</title>
+    <link rel="stylesheet" href="site.css" type="text/css"></link>
+  </head>
+  <body>
+    
+    <div id="menu">
+      <p>This document covers nose version <b>0.11.0</b></p>
+      <p>Last update: <b>Fri Oct  3 17:52:07 2008</b></p>
+      <h2>Plugins</h2><ul><li><a href="plugin_attrib.html">Builtin Plugin: attrib</a></li><li><a href="plugin_capture.html">Builtin Plugin: capture</a></li><li><a href="plugin_cover.html">Builtin Plugin: cover</a></li><li><a href="plugin_debug.html">Builtin Plugin: debug</a></li><li><a href="plugin_deprecated.html">Builtin Plugin: deprecated</a></li><li><a href="plugin_doctests.html">Builtin Plugin: doctests</a></li><li><a href="plugin_failuredetail.html">Builtin Plugin: failuredetail</a></li><li><a href="plugin_isolate.html">Builtin Plugin: isolate</a></li><li><a href="plugin_logcapture.html">Builtin Plugin: logcapture</a></li><li><a href="plugin_multiprocess.html">Builtin Plugin: multiprocess</a></li><li><a href="plugin_prof.html">Builtin Plugin: prof</a></li><li><a href="plugin_skip.html">Builtin Plugin: skip</a></li><li><a href="plugin_testid.html">Builtin Plugin: testid</a></li><li><a href="error_class_plugin.html">ErrorClass Plugins</a></li><li><a href="plugin_interface.html">Plugin Interface</a></li><li><a href="writing_plugins.html">Writing Plugins</a></li></ul><h2>Modules</h2><ul><li><a href="module_nose.case.html">Module: nose.case</a></li><li><a href="module_nose.commands.html">Module: nose.commands</a></li><li><a href="module_nose.config.html">Module: nose.config</a></li><li><a href="module_nose.core.html">Module: nose.core</a></li><li><a href="module_nose.exc.html">Module: nose.exc</a></li><li><a href="module_nose.failure.html">Module: nose.failure</a></li><li><a href="module_nose.importer.html">Module: nose.importer</a></li><li><a href="module_nose.inspector.html">Module: nose.inspector</a></li><li><a href="module_nose.loader.html">Module: nose.loader</a></li><li><a href="module_nose.plugins.manager.html">Module: nose.plugins.manager</a></li><li><a href="module_nose.plugins.plugintest.html">Module: nose.plugins.plugintest</a></li><li><a href="module_nose.proxy.html">Module: nose.proxy</a></li><li><a href="module_nose.result.html">Module: nose.result</a></li><li><a href="module_nose.selector.html">Module: nose.selector</a></li><li><a href="module_nose.suite.html">Module: nose.suite</a></li><li><a href="module_nose.tools.html">Module: nose.tools</a></li><li><a href="module_nose.twistedtools.html">Module: nose.twistedtools</a></li><li><a href="module_nose.util.html">Module: nose.util</a></li></ul><h2>Plugin Examples</h2><ul><li><a href="unwanted_package.html">Excluding Unwanted Packages</a></li><li><a href="errorclass_failure.html">Failure of Errorclasses</a></li><li><a href="imported_tests.html">Importing Tests</a></li><li><a href="empty_plugin.html">Minimal plugin</a></li><li><a href="restricted_plugin_options.html">Restricted Plugin Managers</a></li><li><a href="init_plugin.html">Running Initialization Code Before the Test Run</a></li><li><a href="selector_plugin.html">Using a Custom Selector</a></li><li><a href="plugin_exceptions.html">When Plugins Fail</a></li><li><a href="plugintest_environment.html">nose.plugins.plugintest, os.environ and sys.argv</a></li></ul>
+    </div>
+    
+    <div id="main">
+      <h1>nose: builtin plugin: logcapture</h1>
+      
+      <p>This plugin captures logging statements issued during test
+execution, appending any output captured to the error or failure
+output, should the test fail or raise an error. It is enabled by
+default but may be disabled with the options --nologcapture.</p>
+<p>To remove any other installed logging handlers, use the
+--logging-clear-handlers option.</p>
+<p>When an error or failure occurs, captures log messages are attached to
+the running test in the test.capturedLogging attribute, and added to
+the error failure output.</p>
+<p>You can filter logging statements captured with the --logging-filter option.
+If set, it specifies which logger(s) will be captured; loggers that do not match
+will be passed. Example: specifying --logging-filter=sqlalchemy,myapp
+will ensure that only statements logged via sqlalchemy.engine or myapp or myapp.foo.bar logger will be logged.</p>
+
+
+      <h2>Plugin Methods Implemented</h2>
+
+      <p>This plugin implements the following plugin interface methods:</p>
+      
+      <ul><li><a href="plugin_interface.html#afterTest">afterTest</a></li><li><a href="plugin_interface.html#beforeTest">beforeTest</a></li><li><a href="plugin_interface.html#begin">begin</a></li><li><a href="plugin_interface.html#configure">configure</a></li><li><a href="plugin_interface.html#formatError">formatError</a></li><li><a href="plugin_interface.html#formatFailure">formatFailure</a></li><li><a href="plugin_interface.html#options">options</a></li></ul>
+
+
+      <h2>Commandline Options</h2>
+
+      <p>This plugin adds the following commandline options:</p>
+
+      <pre>Options:
+  --nologcapture        Disable logging capture plugin. Logging configurtion
+                        will be left intact. [NOSE_NOLOGCAPTURE]
+  --logging-format=LOGCAPTURE_FORMAT
+                        Specify custom format to print statements. Uses the
+                        same format as used by standard logging handlers.
+                        [NOSE_LOGFORMAT]
+  --logging-filter=LOGCAPTURE_FILTERS
+                        Specify which statements to filter in/out. By default
+                        everything is captured. If the output is too verbose,
+                        use this option to filter out needless output Example:
+                        filter=foo will capture statements issued ONLY to  foo
+                        or foo.what.ever.sub but not foobar or other logger.
+                        Specify multiple loggers with comma:
+                        filter=foo,bar,baz. [NOSE_LOGFILTER]
+  --logging-clear-handlers
+                        Clear all other logging handlers
+</pre>
+
+      <h2>Source</h2>
+
+      <div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This plugin captures logging statements issued during test</span>
+<span class="sd">execution, appending any output captured to the error or failure</span>
+<span class="sd">output, should the test fail or raise an error. It is enabled by</span>
+<span class="sd">default but may be disabled with the options --nologcapture.</span>
+
+<span class="sd">To remove any other installed logging handlers, use the</span>
+<span class="sd">--logging-clear-handlers option.</span>
+
+<span class="sd">When an error or failure occurs, captures log messages are attached to</span>
+<span class="sd">the running test in the test.capturedLogging attribute, and added to</span>
+<span class="sd">the error failure output.</span>
+
+<span class="sd">You can filter logging statements captured with the --logging-filter option. </span>
+<span class="sd">If set, it specifies which logger(s) will be captured; loggers that do not match</span>
+<span class="sd">will be passed. Example: specifying --logging-filter=sqlalchemy,myapp </span>
+<span class="sd">will ensure that only statements logged via sqlalchemy.engine or myapp or myapp.foo.bar logger will be logged.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">import</span> <span class="nn">os</span>
+<span class="k">import</span> <span class="nn">logging</span>
+<span class="k">from</span> <span class="nn">logging.handlers</span> <span class="k">import</span> <span class="n">BufferingHandler</span>
+
+<span class="k">from</span> <span class="nn">nose.plugins.base</span> <span class="k">import</span> <span class="n">Plugin</span>
+<span class="k">from</span> <span class="nn">nose.util</span> <span class="k">import</span> <span class="n">ln</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">from</span> <span class="nn">cStringIO</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">from</span> <span class="nn">StringIO</span> <span class="k">import</span> <span class="n">StringIO</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">MyMemoryHandler</span><span class="p">(</span><span class="n">BufferingHandler</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">logformat</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="n">BufferingHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">)</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">logformat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span>
+    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span> <span class="c"># do nothing</span>
+    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Our custom record filtering logic.</span>
+
+<span class="sd">        Built-in filtering logic (via logging.Filter) is too limiting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="n">matched</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">rname</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">name</span> <span class="c"># shortcut</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rname</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">rname</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="p">):</span>
+                <span class="n">matched</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">matched</span>
+
+
+<span class="k">class</span> <span class="nc">LogCapture</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Log capture plugin. Enabled by default. Disable with --nologcapture.</span>
+<span class="sd">    This plugin captures logging statement issued during test execution,</span>
+<span class="sd">    appending any output captured to the error or failure output,</span>
+<span class="sd">    should the test fail or raise an error.    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">enabled</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">env_opt</span> <span class="o">=</span> <span class="s">&#39;NOSE_NOLOGCAPTURE&#39;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;logcapture&#39;</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="mi">500</span>
+    <span class="n">logformat</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%(name)s</span><span class="s">: </span><span class="si">%(levelname)s</span><span class="s">: </span><span class="si">%(message)s</span><span class="s">&#39;</span>
+    <span class="n">clear</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">filters</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">):</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+            <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;--nologcapture&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_false&quot;</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="ow">not</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_opt</span><span class="p">),</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;logcapture&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s">&quot;Disable logging capture plugin. &quot;</span>
+                 <span class="s">&quot;Logging configurtion will be left intact.&quot;</span>
+                 <span class="s">&quot; [NOSE_NOLOGCAPTURE]&quot;</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+            <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;--logging-format&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;logcapture_format&quot;</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;NOSE_LOGFORMAT&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">logformat</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s">&quot;Specify custom format to print statements. &quot;</span>
+                 <span class="s">&quot;Uses the same format as used by standard logging handlers.&quot;</span>
+                 <span class="s">&quot; [NOSE_LOGFORMAT]&quot;</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+            <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;--logging-filter&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;logcapture_filters&quot;</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;NOSE_LOGFILTER&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">logformat</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s">&quot;Specify which statements to filter in/out. &quot;</span>
+                 <span class="s">&quot;By default everything is captured. If the output is too verbose,</span><span class="se">\n</span><span class="s">&quot;</span>
+                 <span class="s">&quot;use this option to filter out needless output</span><span class="se">\n</span><span class="s">&quot;</span>
+                 <span class="s">&quot;Example: filter=foo will capture statements issued ONLY to</span><span class="se">\n</span><span class="s">&quot;</span>
+                 <span class="s">&quot; foo or foo.what.ever.sub but not foobar or other logger.</span><span class="se">\n</span><span class="s">&quot;</span>
+                 <span class="s">&quot;Specify multiple loggers with comma: filter=foo,bar,baz.&quot;</span>
+                 <span class="s">&quot; [NOSE_LOGFILTER]</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+            <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;--logging-clear-handlers&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;logcapture_clear&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s">&quot;Clear all other logging handlers&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">conf</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conf</span> <span class="o">=</span> <span class="n">conf</span>
+        <span class="c"># Disable if explicitly disabled, or if logging is</span>
+        <span class="c"># configured via logging config file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">logcapture</span> <span class="ow">or</span> <span class="n">conf</span><span class="o">.</span><span class="n">loggingConfig</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">False</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">logformat</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">logcapture_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">logcapture_clear</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">logcapture_filters</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">setupLoghandler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># setup our handler with root logger</span>
+        <span class="n">root_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">root_logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+                <span class="n">root_logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+        <span class="c"># make sure there isn&#39;t one already</span>
+        <span class="c"># you can&#39;t simply use &quot;if self.handler not in root_logger.handlers&quot;</span>
+        <span class="c"># since at least in unit tests this doesn&#39;t work --</span>
+        <span class="c"># LogCapture() is instantiated for each test case while root_logger is module global</span>
+        <span class="c"># so we always add new MyMemoryHandler instance</span>
+        <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">root_logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">MyMemoryHandler</span><span class="p">):</span>
+                <span class="n">root_logger</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+        <span class="n">root_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="p">)</span>
+        <span class="c"># to make sure everything gets captured</span>
+        <span class="n">root_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NOTSET</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">MyMemoryHandler</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logformat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupLoghandler</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">beforeTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupLoghandler</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">afterTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">formatFailure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatError</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">formatError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+        <span class="c"># logic flow copied from Capture.formatError</span>
+        <span class="n">test</span><span class="o">.</span><span class="n">capturedLogging</span> <span class="o">=</span> <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatLogRecords</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">err</span> 
+        <span class="n">ec</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">tb</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">ec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addCaptureToErr</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="n">records</span><span class="p">),</span> <span class="n">tb</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">formatLogRecords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">format</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">buffer</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">addCaptureToErr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ev</span><span class="p">),</span> <span class="n">ln</span><span class="p">(</span><span class="s">&#39;&gt;&gt; begin captured logging &lt;&lt;&#39;</span><span class="p">)]</span> <span class="o">+</span> \
+                          <span class="n">records</span> <span class="o">+</span> \
+                          <span class="p">[</span><span class="n">ln</span><span class="p">(</span><span class="s">&#39;&gt;&gt; end captured logging &lt;&lt;&#39;</span><span class="p">)])</span>
+</pre></div>
+
+
+    </div>
+    <script src="http://www.google-analytics.com/urchin.js" 
+	    type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      _uacct = "UA-2236166-1";
+      urchinTracker();
+    </script>
+  </body>
+</html>
+  
