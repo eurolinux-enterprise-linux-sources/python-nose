@@ -16,18 +16,25 @@
 %global with_docs 1
 
 Name:           python-nose
-Version:        1.3.0
-Release:        2%{?dist}
+Version:        1.3.7
+Release:        1%{?dist}
 Summary:        Discovery-based unittest extension for Python
 
 Group:          Development/Languages
 License:        LGPLv2+ and Public Domain
-URL:            http://somethingaboutorange.com/mrl/projects/nose/
+URL:            https://nose.readthedocs.org/en/latest/
 Source0:        http://pypi.python.org/packages/source/n/nose/nose-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildArch:      noarch
-BuildRequires:  python2-devel
+# Fix UnicodeDecodeError with captured output
+# https://github.com/nose-devs/nose/pull/988
+Patch0:         python-nose-unicode.patch
+# Allow docutils to read utf-8 source
+Patch1:         python-nose-readunicode.patch
+
+BuildArch:     noarch
+BuildRequires: python2-devel
+Provides:      python2-%{upstream_name} = %{version}-%{release}
 %if 0%{?with_python3}
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
@@ -35,8 +42,8 @@ BuildRequires: python3-coverage >= 3.4-1
 %endif
 BuildRequires: python-setuptools
 BuildRequires: dos2unix
-BuildRequires:  python-coverage >= 3.4-1
-Requires:       python-setuptools
+BuildRequires: python-coverage >= 3.4-1
+Requires:      python-setuptools
 
 %description
 nose extends the test loading and running features of unittest, making
@@ -57,8 +64,12 @@ output capture and more.
 %package docs
 Summary:        Nose Documentation
 Group:          Documentation
+%if 0%{?with_docs}
 BuildRequires:  python-sphinx
-Requires: python-nose
+%endif
+Provides: python2-nose-docs = %{version}-%{release}
+Requires: python-nose = %{version}-%{release}
+
 
 %description docs
 Documentation for Nose
@@ -91,6 +102,8 @@ python3 unittests.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
+%patch0 -p1
+%patch1 -p1
 
 dos2unix examples/attrib_plugin.py
 
@@ -99,10 +112,9 @@ rm -rf %{py3dir}
 cp -a . %{py3dir}
 %endif # with_python3
 
-rm doc/*.pyc
 
 %build
-%{__python} setup.py build
+%{__python2} setup.py build
 
 %if 0%{?with_python3}
 pushd %{py3dir}
@@ -140,7 +152,9 @@ rm -rf reST/.static reST/.templates
 
 
 %check
-%{__python} selftest.py
+# Disable test_concurrent_shared as per rhbz#1176288
+mv functional_tests/test_multiprocessing/test_concurrent_shared.py{,.notest}
+%{__python2} selftest.py
 
 %if 0%{?with_python3}
 pushd %{py3dir}
@@ -182,6 +196,14 @@ rm -rf %{buildroot}
 %endif # with_docs
 
 %changelog
+* Thu Oct 13 2016 Charalampos Stratakis <cstratak@redhat.com> - 1.3.7-1
+- Update to nose 1.3.7
+Resolves: rhbz#1377093
+
+* Tue Jan 06 2015 Slavek Kabrda <bkabrda@redhat.com> - 1.3.0-3
+- Disable unstable multiprocessing test.
+Resolves: rhbz#1176288
+
 * Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.3.0-2
 - Mass rebuild 2013-12-27
 
