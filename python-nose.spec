@@ -17,7 +17,7 @@
 
 Name:           python-nose
 Version:        1.3.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Discovery-based unittest extension for Python
 
 Group:          Development/Languages
@@ -182,6 +182,9 @@ rm -rf %{buildroot}
 %endif # with_docs
 
 %changelog
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.3.0-2
+- Mass rebuild 2013-12-27
+
 * Tue Apr  9 2013 Toshio Kuratomi <toshio@fedoraproject.org> - 1.3.0-1
 - Update to 1.3.0 upstream with python-3.3 fixes
 
