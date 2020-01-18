@@ -17,7 +17,7 @@
 
 Name:           python-nose
 Version:        1.3.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Discovery-based unittest extension for Python
 
 Group:          Development/Languages
@@ -140,6 +140,8 @@ rm -rf reST/.static reST/.templates
 
 
 %check
+# Disable test_concurrent_shared as per rhbz#1176288
+mv functional_tests/test_multiprocessing/test_concurrent_shared.py{,.notest}
 %{__python} selftest.py
 
 %if 0%{?with_python3}
@@ -182,6 +184,10 @@ rm -rf %{buildroot}
 %endif # with_docs
 
 %changelog
+* Tue Jan 06 2015 Slavek Kabrda <bkabrda@redhat.com> - 1.3.0-3
+- Disable unstable multiprocessing test.
+Resolves: rhbz#1176288
+
 * Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.3.0-2
 - Mass rebuild 2013-12-27
 
